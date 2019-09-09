@@ -1,0 +1,10 @@
+version: '2'
+services:
+
+  dcache:
+    image: dcache/dcache:6.0.0-SNAPSHOT
+    network_mode: "host"
+    command: core
+    volumes:
+    - ./docker-layout.conf:/opt/dcache/etc/layouts/docker-layout.conf
+

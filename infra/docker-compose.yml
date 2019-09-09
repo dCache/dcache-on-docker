@@ -1,0 +1,38 @@
+version: '2'
+services:
+
+  zk:
+    image: zookeeper:3.5
+    restart: always
+    environment:
+    - ZOO_ADMINSERVER_ENABLED=false
+    ports:
+    - "2181:2181"
+    network_mode: "host"
+
+  pg:
+    image: postgres
+    environment:
+    - POSTGRES_DB=chimera
+    - POSTGRES_PASSWORD=let-me-in
+    ports:
+    - "127:0.0.1:5432:5432"
+    network_mode: "host"
+
+  kafka:
+    image: wurstmeister/kafka
+    depends_on:
+    - zk
+    ports:
+    - "9092:9092"
+    network_mode: "host"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_CREATE_TOPICS: billing:1:1
+      KAFKA_ZOOKEEPER_CONNECT: localhost:2181/kafka
+      KAFKA_ADVERTISED_HOST_NAME: os-dcache-lab.desy.de
+      KAFKA_ADVERTISED_PORT: 9092
+      LOG4J_LOGGER_ORG_APACHE_KAFKAr: WARN
+      LOG4J_LOGGER_ORG_APACHE_ZOOKEEPER: WARN
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
