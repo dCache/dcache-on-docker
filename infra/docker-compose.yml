@@ -32,7 +32,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: localhost:2181/kafka
       KAFKA_ADVERTISED_HOST_NAME: os-dcache-lab.desy.de
       KAFKA_ADVERTISED_PORT: 9092
-      LOG4J_LOGGER_ORG_APACHE_KAFKAr: WARN
+      LOG4J_LOGGER_ORG_APACHE_KAFKA: WARN
       LOG4J_LOGGER_ORG_APACHE_ZOOKEEPER: WARN
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
