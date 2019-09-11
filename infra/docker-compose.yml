@@ -9,6 +9,12 @@ services:
     ports:
     - "2181:2181"
     network_mode: "host"
+    mem_limit: 512m
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 4096
+        hard: 8192
 
   pg:
     image: postgres
