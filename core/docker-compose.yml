@@ -6,6 +6,7 @@ services:
     network_mode: "host"
     command: core
     volumes:
+    - ./dcache.conf:/opt/dcache/etc/dcache.conf
     - ./docker-layout.conf:/opt/dcache/etc/layouts/docker-layout.conf
     - ${HOME}/.ssh/authorized_keys:/opt/dcache/etc/admin/authorized_keys2:ro
 
