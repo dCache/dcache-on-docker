@@ -42,7 +42,8 @@ services:
       LOG4J_LOGGER_ORG_APACHE_ZOOKEEPER: WARN
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-    mem_limit: 512m
+    restart: on-failure
+    mem_limit: 1024m
     ulimits:
       nproc: 65535
       nofile:
