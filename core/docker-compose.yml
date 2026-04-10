@@ -1,12 +1,19 @@
-version: '2'
+version: '3'
 services:
 
-  dcache:
-    image: dcache/dcache:6.1.0-SNAPSHOT
-    network_mode: "host"
+  dcache-core:
+    image: dcache/dcache:11.0
     command: core
+    networks:
+      - dcache
+    ports:
+      - "8080:8080"
+      - "3880:3880"
     volumes:
-    - ./dcache.conf:/opt/dcache/etc/dcache.conf
-    - ./docker-layout.conf:/opt/dcache/etc/layouts/docker-layout.conf
-    - ${HOME}/.ssh/authorized_keys:/opt/dcache/etc/admin/authorized_keys2:ro
+      - ../common/dcache.conf:/opt/dcache/etc/dcache.conf
+      - ./docker-layout.conf:/opt/dcache/etc/layouts/docker-layout.conf
 
+networks:
+  dcache:
+    external: true
+    name: dcache
