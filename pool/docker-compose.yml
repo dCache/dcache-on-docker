@@ -1,10 +1,17 @@
-version: '2'
+version: '3'
 services:
 
-  dcache:
-    image: dcache/dcache:6.0.0-SNAPSHOT
-    network_mode: "host"
+  dcache-pool:
+    image: dcache/dcache:11.0
+    hostname: pool-node-1
+    networks:
+      - dcache
     volumes:
-    - ./dcache.conf:/opt/dcache/etc/dcache.conf
-    - ./docker-layout.conf:/opt/dcache/etc/layouts/docker-layout.conf
+      - ../common/dcache.conf:/opt/dcache/etc/dcache.conf
+      - ./docker-layout.conf:/opt/dcache/etc/layouts/docker-layout.conf
+      - ./data:/pool
 
+networks:
+  dcache:
+    external: true
+    name: dcache
