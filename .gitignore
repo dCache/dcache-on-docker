@@ -1,3 +1,13 @@
 #volume directories
 pool/data/
+remote/data/
 infra/pgdata/
+
+# SSH host key - generate locally with:
+# ssh-keygen -t rsa -b 2048 -f core/ssh_host_rsa_key -N ""
+core/ssh_host_rsa_key
+core/ssh_host_rsa_key.pub
+
+# Personal public key - add your own with comment admin@<something>:
+# awk '{print $1, $2, "admin@localhost"}' ~/.ssh/id_ed25519.pub > core/authorized_keys2
+core/authorized_keys2

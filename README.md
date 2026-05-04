@@ -18,4 +18,11 @@ Compose file with central dCache components, like PoolManager, PnfsManager, admi
 
 ### /pool
 
-Compose file to start pools
+Compose file to start pools for "main site"
+
+### /remote 
+
+Compose file to start pool(s) and door of simulated "remote site"
+
+
+

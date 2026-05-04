@@ -9,9 +9,16 @@ services:
     ports:
       - "8080:8080"
       - "3880:3880"
+      - "22224:22224"
     volumes:
       - ../common/dcache.conf:/opt/dcache/etc/dcache.conf
       - ./docker-layout.conf:/opt/dcache/etc/layouts/docker-layout.conf
+      - ./ssh_host_rsa_key:/opt/dcache/etc/admin/ssh_host_rsa_key
+      - ./authorized_keys2:/opt/dcache/etc/admin/authorized_keys2
+      - ./gplazma.conf:/opt/dcache/etc/gplazma.conf
+      - ./htpasswd:/opt/dcache/etc/htpasswd
+      - ./multi-mapfile:/opt/dcache/etc/multi-mapfile
+      - ./omnisession.conf:/opt/dcache/etc/omnisession.conf
 
 networks:
   dcache:
