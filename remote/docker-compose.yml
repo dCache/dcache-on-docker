@@ -5,7 +5,9 @@ services:
     image: dcache/dcache:11.0
     hostname: remote-node-1
     networks:
-      - dcache
+      dcache:
+      remote-net:
+        ipv4_address: 10.2.0.10
     ports:
       - "8180:8180"
     volumes:
@@ -17,3 +19,6 @@ networks:
   dcache:
     external: true
     name: dcache
+  remote-net:
+    external: true
+    name: remote-net

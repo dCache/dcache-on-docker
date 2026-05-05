@@ -19,6 +19,7 @@ services:
       - ./htpasswd:/opt/dcache/etc/htpasswd
       - ./multi-mapfile:/opt/dcache/etc/multi-mapfile
       - ./omnisession.conf:/opt/dcache/etc/omnisession.conf
+      - ./poolmanager.conf:/opt/dcache/etc/poolmanager.conf
 
 networks:
   dcache:
