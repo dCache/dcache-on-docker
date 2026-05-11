@@ -1,8 +1,8 @@
-version: '3'
 services:
 
   dcache-core:
-    image: dcache/dcache:11.0
+    image: dcache/dcache:latest
+    pull_policy: never
     command: core
     networks:
       - dcache

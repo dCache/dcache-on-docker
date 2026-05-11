@@ -1,9 +1,9 @@
-version: '3'
 services:
 
   dcache-pool:
-    image: dcache/dcache:11.0
-    hostname: pool-node-1
+    image: dcache/dcache:latest
+    pull_policy: never
+    hostname: pool-1
     networks:
       - dcache
     volumes:

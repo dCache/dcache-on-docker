@@ -1,11 +1,12 @@
-version: '3'
 services:
 
   dcache-pool:
-    image: dcache/dcache:11.0
-    hostname: remote-node-1
+    image: dcache/dcache:latest
+    pull_policy: never
+    hostname: remote-1
     networks:
       dcache:
+        ipv4_address: 172.18.0.10
       remote-net:
         ipv4_address: 10.2.0.10
     ports:
