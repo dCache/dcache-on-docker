@@ -1,0 +1,86 @@
+{{- range .Values.dcache.pools }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $.Release.Name }}-pool-{{ . }}
+spec:
+  selector:
+    matchLabels:
+      app: pool-{{ . }}
+  replicas: 1
+  serviceName: {{ $.Release.Name }}-pool-{{ . }}-svc
+  template:
+    metadata:
+      labels:
+        app: pool-{{ . }}
+        {{- include "dcache.selectorLabels" $ | nindent 8 }}
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: pool
+        image: "{{ $.Values.image.registry }}/{{ $.Values.image.repository }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
+        imagePullPolicy: {{ $.Values.image.pullPolicy }}
+        command: ["/run.sh", "pool-{{ . }}-svc"]
+        {{- if $.Values.readinessProbe.enabled}}
+        {{ include "dcache.readiness.probe" $ | indent 8 }}
+          tcpSocket:
+            port: {{ $.Values.mover.nfs }}
+        {{- end}}
+        {{- if $.Values.livenessProbe.enabled}}
+        {{ include "dcache.liveness.probe" $ | indent 8 }}
+          tcpSocket:
+            port: {{ $.Values.mover.nfs }}
+        {{- end}}
+        {{- if $.Values.startupProbe.enabled}}
+        {{ include "dcache.startup.probe" $ | indent 8 }}
+          tcpSocket:
+            port: {{ $.Values.mover.nfs }}
+        {{- end}}
+        volumeMounts:
+        {{ include "dcache.conf.mounts" . | indent 8 }}
+        - name: certs-store-{{ . }}
+          mountPath: /etc/grid-security
+          readOnly: true
+        - name: pool-data
+          mountPath: /pool
+        {{- if $.Values.dcache.hsm.enabled}}
+        - name: pool-hsm-config
+          mountPath: /pool/setup
+          subPath: setup
+          readOnly: true
+        {{- end}}
+      initContainers:
+      {{ $host := print $.Release.Name  "-pool-" . "-svc." $.Release.Namespace ".svc.cluster.local" -}}
+      {{ include "dcache.certs.init" $host }}
+          volumeMounts:
+            - mountPath: /etc/grid-security
+              name: certs-store-{{ . }}
+      {{- if $.Values.dcache.door.enabled }}
+        - name: wait-for-core
+          image: busybox:1.37
+          command: ['sh', '-c', "until nc -z -v  {{ $.Release.Name }}-door-svc.{{ $.Release.Namespace }}.svc.cluster.local {{ $.Values.cell.tunnel }}; do echo waiting for core to start; sleep 2; done"]
+      {{ end }}
+      volumes:
+      {{ include "dcache.conf.volume" $ | indent 6 }}
+      - name: certs-store-{{ . }}
+        persistentVolumeClaim:
+          claimName: {{ $.Release.Name }}-pool-{{ . }}-certs-store
+      {{- if $.Values.dcache.hsm.enabled}}
+      - name: pool-hsm-config
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "pool-setup"
+            path: "setup"
+      {{- end}}
+  volumeClaimTemplates:
+  - metadata:
+      name: pool-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 20Gi
+---
+{{- end }}

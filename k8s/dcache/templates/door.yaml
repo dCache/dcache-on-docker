@@ -1,0 +1,155 @@
+{{- if .Values.dcache.door.enabled }}
+
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-dcache-door
+spec:
+  selector:
+    matchLabels:
+      app: door
+  replicas: 1
+  serviceName: {{ .Release.Name }}-door-svc
+  template:
+    metadata:
+      labels:
+        {{- include "dcache.selectorLabels" . | nindent 8 }}
+        app: door
+    spec:
+      containers:
+      - name: dcache-door
+        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["/run.sh", "door-svc" ]
+        {{- if .Values.readinessProbe.enabled}}
+        {{ include "dcache.readiness.probe" . | indent 8 }}
+          tcpSocket:
+            port: 2049
+        {{- end}}
+        {{- if .Values.livenessProbe.enabled}}
+        {{ include "dcache.liveness.probe" . | indent 8 }}
+          tcpSocket:
+            port: 2049
+        {{- end}}
+        {{- if .Values.startupProbe.enabled}}
+        {{ include "dcache.startup.probe" . | indent 8 }}
+          tcpSocket:
+            port: 2049
+        {{- end}}
+        volumeMounts:
+        {{ include "dcache.conf.mounts" . | indent 8 }}
+        - name: init-scripts
+          mountPath: /dcache.init.d/00-init.sh
+          subPath: 00-init.sh
+          readOnly: true
+        - name: exports
+          mountPath: /opt/dcache/etc/exports
+          subPath: exports
+          readOnly: true
+        - name: gplazma-conf
+          mountPath: /opt/dcache/etc/gplazma.conf
+          subPath: gplazma.conf
+          readOnly: true
+        - name: multimap-id-to-username
+          mountPath: /opt/dcache/etc/multimap-id-to-username.conf
+          subPath: multimap-id-to-username.conf
+          readOnly: true
+        - name: multimap-id-to-groupname
+          mountPath: /opt/dcache/etc/multimap-id-to-groupname.conf
+          subPath: multimap-id-to-groupname.conf
+          readOnly: true
+        - name: storage-authzdb
+          mountPath: /opt/dcache/etc/storage-authzdb
+          subPath: storage-authzdb
+          readOnly: true
+        - name: htpasswd
+          mountPath: /opt/dcache/etc/htpasswd
+          subPath: htpasswd
+          readOnly: true
+        - name: linkgroupauthz
+          mountPath: /opt/dcache/etc/linkgroupauthz.conf
+          subPath: linkgroupauthz.conf
+          readOnly: true
+        - name: poolmanager-conf
+          mountPath: /opt/dcache/var/config/poolmanager.conf
+          subPath: poolmanager.conf
+          readOnly: true
+        - name: certs
+          mountPath: /etc/grid-security
+          readOnly: true
+      initContainers:
+      {{ $host := print $.Release.Name "-door-svc."  $.Release.Namespace ".svc.cluster.local" -}}
+      {{ include "dcache.certs.init" $host }}
+          volumeMounts:
+            - mountPath: /etc/grid-security
+              name: certs
+      {{- if .Values.services.sshAdmin.enabled }}
+        - name: gen-ssh-key
+          image: docker.io/kroniak/ssh-client
+          command: ['sh', '-c', "ssh-keygen -t rsa -b 2048 -N '' -f /etc/grid-security/ssh_host_rsa_key; chown 994:1000 /etc/grid-security/ssh_host_rsa_key"]
+          volumeMounts:
+            - mountPath: /etc/grid-security
+              name: certs
+      {{- end }}
+      volumes:
+      {{ include "dcache.conf.volume" . | indent 6 }}
+      - name: certs
+        persistentVolumeClaim:
+          claimName: {{ $.Release.Name }}-door-certs-store
+      - name: init-scripts
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "00-init.sh"
+            path: "00-init.sh"
+      - name: exports
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "export"
+            path: "exports"
+      - name: gplazma-conf
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "gplazma.conf"
+            path: "gplazma.conf"
+      - name: multimap-id-to-username
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "multimap-id-to-username"
+            path: "multimap-id-to-username.conf"
+      - name: multimap-id-to-groupname
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "multimap-id-to-groupname"
+            path: "multimap-id-to-groupname.conf"
+      - name: storage-authzdb
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "storage-authzdb"
+            path: "storage-authzdb"
+      - name: htpasswd
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "htpasswd"
+            path: "htpasswd"
+      - name: linkgroupauthz
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "linkgroupauthz"
+            path: "linkgroupauthz.conf"
+      - name: poolmanager-conf
+        configMap:
+          name: {{ $.Release.Name }}-configmap
+          items:
+          - key: "poolmanager.conf"
+            path: "poolmanager.conf"
+
+{{ end }}

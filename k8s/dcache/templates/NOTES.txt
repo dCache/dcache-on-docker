@@ -1,0 +1,27 @@
+You are running
+
+     888  .d8888b.                    888               
+     888 d88P  Y88b                   888               
+     888 888    888                   888               
+ .d88888 888         8888b.   .d8888b 88888b.   .d88b.  
+d88" 888 888            "88b d88P"    888 "88b d8P  Y8b 
+888  888 888    888 .d888888 888      888  888 88888888 
+Y88b 888 Y88b  d88P 888  888 Y88b.    888  888 Y8b.     
+ "Y88888  "Y8888P"  "Y888888  "Y8888P 888  888  "Y8888  
+                                                        
+
+
+
+Get the list of pods by executing:
+
+  kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+
+Access the pod you want to debug by executing
+
+  kubectl exec --namespace {{ .Release.Namespace }} -ti <NAME OF THE POD> -- /bin/sh
+
+
+Access frontend service by running these commands:
+
+  kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ .Release.Name }}-door-svc 3881:{{  .Values.services.frontends.port }} &

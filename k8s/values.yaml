@@ -1,0 +1,54 @@
+image:
+  registry: docker.io
+  repository: lens161/dcache-dev
+  tag: "zones"
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: dockerhub-creds
+
+dcache:
+  pools:
+    - pool-1
+    - remote-1
+
+  configExtra: |
+    dcache.enable.space-reservation = false
+    dcache.enable.kafka = false
+    chimera.db.host=pg
+    chimera.db.user=postgres
+    chimera.db.password=let-me-in
+    chimera.db.name=chimera
+
+  layoutExtra: |
+    pool.plugins.meta=org.dcache.pool.repository.meta.db.BerkeleyDBMetaDataRepository
+
+zookeeper:
+  embedded: false
+  servers: zk:2181
+
+services:
+  srm:
+    enabled: false
+  dcap:
+    enabled: false
+  dcapg:
+    enabled: false
+  xrootd:
+    enabled: false
+  xrootdg:
+    enabled: false
+  gridftp:
+    enabled: false
+  webdavs:
+    enabled: false
+  frontends:
+    enabled: false
+  nfs:
+    enabled: true
+  webdav:
+    enabled: true
+  frontend:
+    enabled: true
+  sshAdmin:
+    enabled: true

@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: core
+  namespace: dcache-fuse
+
+spec:
+  selector:
+    app: dcache-core
+  clusterIP: None
+  ports:
+    - port: 8080
+    - port: 3880
+    - port: 22224
+    - port: 2049
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dcache-core
+  namespace: dcache-fuse
+  
+spec:
+  serviceName: core
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dcache-core 
+
+  template:
+    metadata:
+      labels:
+        app: dcache-core
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-creds
+
+      containers:
+        - name: dcache-core
+          image: lens161/dcache-dev:zones
+          args: ["core"]
+          ports:
+            - containerPort: 8080
+            - containerPort: 3880
+            - containerPort: 22224
+            - containerPort: 2049
+          volumeMounts:
+            - name: common-config
+              mountPath: /opt/dcache/etc/dcache.conf
+              subPath: dcache.conf
+              readOnly: true
+            - name: core-config
+              mountPath: /opt/dcache/etc/layouts/docker-layout.conf
+              subPath: docker-layout.conf
+              readOnly: true
+            - name: core-config
+              mountPath: /opt/dcache/etc/gplazma.conf
+              subPath: gplazma.conf
+              readOnly: true
+            - name: core-config
+              mountPath: /opt/dcache/etc/htpasswd
+              subPath: htpasswd
+              readOnly: true
+            - name: core-config
+              mountPath: /opt/dcache/etc/multi-mapfile
+              subPath: multi-mapfile
+              readOnly: true
+            - name: core-config
+              mountPath: /opt/dcache/etc/omnisession.conf
+              subPath: omnisession.conf
+              readOnly: true
+            - name: core-config
+              mountPath: /opt/dcache/etc/poolmanager.conf
+              subPath: poolmanager.conf
+              readOnly: true
+            - name: core-config
+              mountPath: /opt/dcache/etc/exports
+              subPath: exports
+              readOnly: true
+            - name: core-config
+              mountPath: /opt/dcache/etc/admin/authorized_keys2
+              subPath: authorized_keys2
+              readOnly: true
+            - name: admin-ssh
+              mountPath: /opt/dcache/etc/admin/ssh_host_ed25519_key
+              subPath: ssh_host_ed25519_key
+              readOnly: true
+      volumes:
+        - name: common-config
+          configMap:
+            name: dcache-common
+        - name: core-config
+          configMap:
+            name: dcache-core-config
+        - name: admin-ssh
+          secret:
+            secretName: dcache-admin-ssh
+            defaultMode: 0600
+
+
+

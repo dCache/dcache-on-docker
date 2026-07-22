@@ -1,0 +1,155 @@
+
+image:
+  registry: docker.io
+  repository: dcache/dcache
+  tag: ""
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+
+
+dcache:
+  door:
+    enabled: true
+  hsm:
+    enabled: false
+  qos:
+    enabled: false
+  spacemanager:
+    enabled: true
+  pools:
+    - a
+    - b
+    - c
+  # extra configuration for dcache.conf, placed before the standard configuration
+  configExtraPre: |
+    # custom configuration before other settings
+
+  # extra configuration for dcache.conf, placed after the standard configuration
+  configExtra: |
+
+
+  # extra configuration for layout.conf, placed before the standard layout
+  layoutExtraPre: |
+    # custom configuration before other settings
+
+  # extra configuration for layout.conf, placed after the standard layout
+  layoutExtra: |
+
+
+  #
+  # Extra modules added into /opt/dcache/share/plugins directory
+  #
+  plugins:
+    cta:
+      enabled: false
+      package: https://gitlab.desy.de/dcache/dcache-cta/-/package_files/12985/download
+      endpoint: cta-frontend.some.domain:17017
+      user: cta-user
+      group: cta-group
+      instance: cta-instance
+      ioport: 1094
+
+cell:
+  tunnel: 11111
+
+#
+# Zookeeper to use
+#
+zookeeper:
+  # whether to use dCache-embedded zookeeper
+  embedded: false
+  # connection string to external zookeeper servers
+  servers: cells-zookeeper:2181
+
+# liveness, readiness and startup probes
+
+# dCache containers' liveness probe.
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+
+# dCache containers' readiness probe.
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+
+# dCache containers' startup probe.
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 15
+  successThreshold: 1
+
+#
+# dCache doors/services
+#
+services:
+
+  nfs:
+    enabled: true
+    port: 2049
+
+  dcap:
+    enabled: true
+    port: 22125
+
+  dcapg:
+    enabled: true
+    port: 22128
+
+  xrootd:
+    enabled: true
+    port: 1094
+
+  xrootdg:
+    enabled: true
+    port: 1095
+
+  webdav:
+    enabled: true
+    port: 8080
+
+  webdavs:
+    enabled: true
+    port: 8083
+
+  srm:
+    enabled: true
+    port: 8443
+
+  gridftp:
+    enabled: true
+    port: 2811
+
+  sshAdmin:
+    enabled: true
+    port: 22224
+
+  frontend:
+    enabled: true
+    port: 3880
+
+  frontends:
+    enabled: true
+    port: 3881
+
+mover:
+  nfs: 32049
+  xrootd: 31094
+  http: 38080
+  https: 38083
+  wan_range_min: 28000
+  wan_range_max: 28050

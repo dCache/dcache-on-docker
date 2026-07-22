@@ -1,0 +1,105 @@
+{{- if .Values.dcache.door.enabled }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-door-svc
+  labels:
+    app: door
+spec:
+  selector:
+    app: door
+  ports:
+
+    {{ if .Values.services.nfs.enabled }}
+    - name: nfs-door
+      port: {{ $.Values.services.nfs.port }}
+      targetPort: 2049
+    {{- end }}
+
+    {{ if .Values.services.dcap.enabled }}
+    - name: dcap-door
+      port: {{ $.Values.services.dcap.port }}
+      targetPort: 22125
+    {{- end }}
+
+    {{ if .Values.services.dcapg.enabled }}
+    - name: dcapg-door
+      port: {{ $.Values.services.dcapg.port }}
+      targetPort: 22128
+    {{- end }}
+
+    {{ if .Values.services.xrootd.enabled }}
+    - name: xrootd-door
+      port: {{ $.Values.services.xrootd.port }}
+      targetPort: 1094
+    {{- end }}
+
+    {{ if .Values.services.xrootdg.enabled }}
+    - name: xrootd-door-gsi
+      port: {{ $.Values.services.xrootdg.port }}
+      targetPort: 1095
+    {{- end }}
+
+    {{ if .Values.services.webdav.enabled }}
+    - name: webdav-door
+      port: {{ $.Values.services.webdav.port }}
+      targetPort: 8080
+    {{- end }}
+
+    {{ if .Values.services.webdavs.enabled }}
+    - name: webdavs-door
+      port: {{ $.Values.services.webdavs.port }}
+      targetPort: 8083
+    {{- end }}
+
+    {{ if .Values.services.gridftp.enabled }}
+    - name: ftp-door
+      port: {{ $.Values.services.gridftp.port }}
+      targetPort: 2811
+    {{- end }}
+
+    {{ if .Values.services.srm.enabled }}
+    - name: srm-door
+      port: {{ $.Values.services.srm.port }}
+      targetPort: 8443
+    {{- end }}
+
+    {{ if .Values.services.sshAdmin.enabled }}
+    - name: admin-door
+      port: {{ $.Values.services.sshAdmin.port }}
+      targetPort: 22224
+    {{- end }}
+
+    {{ if .Values.services.frontend.enabled }}
+    - name: frontend-door
+      port: {{ $.Values.services.frontend.port }}
+      targetPort: 3880
+    {{- end }}
+
+    {{ if .Values.services.frontends.enabled }}
+    - name: frontend-s-door
+      port: {{ $.Values.services.frontends.port }}
+      targetPort: 3881
+    {{- end }}
+
+    {{ if .Values.zookeeper.embedded }}
+    - name: zookeeper
+      port: 2181
+      targetPort: 2181
+    {{- end }}
+
+
+    - name: cell-tunnel
+      port: {{ $.Values.cell.tunnel }}
+      targetPort: 11111
+
+    {{ $range_start := ( $.Values.mover.wan_range_min | int) }}
+    {{ $range_stop := ( $.Values.mover.wan_range_max | int) }}
+    {{- range $port_index, $port := untilStep $range_start $range_stop 1 }}
+    - name: wan-port-{{ $port_index }}
+      port: {{ $port }}
+      targetPort: {{ $port }}
+    {{- end }}
+
+{{ end }}

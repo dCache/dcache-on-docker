@@ -1,0 +1,15 @@
+annotations:
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 9.2.0
+description: dCache Helm chart for Kubernetes
+home: https://dcache.org
+icon: https://raw.githubusercontent.com/dCache/dcache-helm/master/.assets/dcache-icon-220x235.png
+keywords:
+- storage
+- dcache
+name: dcache
+sources:
+- https://github.com/dCache/dcache-helm
+version: 0.1.0

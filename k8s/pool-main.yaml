@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-pool
+  namespace: dcache-fuse
+
+spec:
+  selector:
+    app: main-pool
+  clusterIP: None
+  ports:
+    - port: 32049
+    - port: 31094
+    - port: 38090
+    - port: 38453
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: main-pool
+  namespace: dcache-fuse
+
+spec:
+  serviceName: main-pool
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-pool
+
+  template:
+    metadata:
+      labels:
+        app: main-pool
+    spec:
+      imagePullSecrets:
+       - name: dockerhub-creds
+      hostname: main-1
+      
+      
+      containers:
+        - name: main-1
+          image: lens161/dcache-dev:zones
+          ports:
+            - containerPort: 32049
+            - containerPort: 31094
+            - containerPort: 38090
+            - containerPort: 38453
+          volumeMounts:
+            - name: common-config
+              mountPath: /opt/dcache/etc/dcache.conf
+              subPath: dcache.conf
+              readOnly: True
+            - name: pool-main-config
+              mountPath: /opt/dcache/etc/layouts/docker-layout.conf
+              subPath: docker-layout.conf
+              readOnly: True
+            - name: pool-main-data
+              mountPath: /pool
+        
+      volumes:
+        - name: common-config
+          configMap: 
+            name: dcache-common
+        - name: pool-main-config
+          configMap: 
+            name: pool-main-config
+  volumeClaimTemplates:
+    - metadata:
+        name: pool-main-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
